@@ -1,13 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
- 
+
 from database_setup import Restaurant, Base, MenuItem
- 
-engine = create_engine('sqlite:///restaurantmenu.db')
+
+engine = create_engine('postgresql+psycopg2://bhanu:bhanu@localhost/restaurant')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
- 
+
 DBSession = sessionmaker(bind=engine)
 # A DBSession() instance establishes all conversations with the database
 # and represents a "staging zone" for all the objects loaded into the
@@ -127,7 +127,7 @@ menuItem2 = MenuItem(name = "Chinese Dumplings", description = "a common Chinese
 session.add(menuItem2)
 session.commit()
 
-menuItem3 = MenuItem(name = "Gyoza", description = "The most prominent differences between Japanese-style gyoza and Chinese-style jiaozi are the rich garlic flavor, which is less noticeable in the Chinese version, the light seasoning of Japanese gyoza with salt and soy sauce, and the fact that gyoza wrappers are much thinner", price = "", course = "", restaurant = restaurant1)
+menuItem3 = MenuItem(name = "Gyoza", description = "The most prominent differences between Japanese-style gyoza and Chinese-style jiaozi are the rich garlic flavor, which is less noticeable in the Chinese version, the light seasoning of Japanese gyoza with salt and soy sauce", price = "", course = "", restaurant = restaurant1)
 
 session.add(menuItem3)
 session.commit()
@@ -209,7 +209,7 @@ session.commit()
 
 
 
-#Menu for Andala's 
+#Menu for Andala's
 restaurant1 = Restaurant(name = "Andala\'s")
 
 session.add(restaurant1)
@@ -292,5 +292,4 @@ menuItem2 = MenuItem(name = "Cachapa", description = "Golden brown, corn-based v
 session.add(menuItem2)
 session.commit()
 
-print "added menu items!"
-
+print ("added menu items!")
