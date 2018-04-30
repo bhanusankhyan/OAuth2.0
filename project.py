@@ -37,6 +37,7 @@ def fbconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     access_token = request.data
+    access_token = access_token.decode('utf-8')
     print ("access token received %s " % access_token)
 
 
@@ -47,8 +48,9 @@ def fbconnect():
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
         app_id, app_secret, access_token)
     h = httplib2.Http()
-    result = h.request(url, 'GET')[1]
-
+    result = h.request(url, 'GET')[1].decode('utf-8')
+    data = json.loads(result)
+    return data
 
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.8/me"
@@ -59,14 +61,15 @@ def fbconnect():
         and replace the remaining quotes with nothing so that it can be used directly in the graph
         api calls
     '''
-    token = result.split(',')[0].split(':')[1].replace('"', '')
+    token = 'access_token=' + data['access_token']
 
     url = 'https://graph.facebook.com/v2.8/me?access_token=%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     # print "url sent for API access:%s"% url
     # print "API JSON result: %s" % result
-    data = json.loads(result)
+    res_json = result.decode('utf-8').replace(" ' ",' " ')
+    data = json.loads(res_json)
     login_session['provider'] = 'facebook'
     login_session['username'] = data["name"]
     login_session['email'] = data["email"]
@@ -238,9 +241,8 @@ def logout():
        del login_session['picture']
        del login_session['email']
        #del login_session['user_id']
-       response = make_response(json.dumps('Current user logged out.'), 200)
-       response.headers['Content-Type'] = 'application/json'
-       return response
+       flash('User Logged Out!')
+       return redirect('/restaurant')
 
     else:
        print ("In logout, failed to revoke token for user '%s' response was '%s'" % (stored_username, result['status']))
@@ -303,6 +305,8 @@ def editRestaurant(restaurant_id):
   if request.method == 'POST':
       if request.form['name']:
         editedRestaurant.name = request.form['name']
+        session.add(editedRestaurant)
+        session.commit()
         flash('Restaurant Successfully Edited %s' % editedRestaurant.name)
         return redirect(url_for('showRestaurants'))
   else:
